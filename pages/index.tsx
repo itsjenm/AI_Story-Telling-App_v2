@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { LinkedSlider } from "@/components/ui/linkedslider";
 import { Textarea } from "@/components/ui/textarea";
 import essay from "@/lib/essay";
+import Chat from './story_telling';
 
 const DEFAULT_CHUNK_SIZE = 1024;
 const DEFAULT_CHUNK_OVERLAP = 20;
@@ -39,9 +40,12 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>LlamaIndex.TS Playground</title>
+        <title>Story Telling App</title>
+        <meta name="description" content="A story telling app using AI" />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="mx-2 flex h-full flex-col lg:mx-56">
+        <Chat />
         <div className="space-y-2">
           <Label>Settings:</Label>
           <div>
