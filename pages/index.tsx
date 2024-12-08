@@ -1,3 +1,5 @@
+'use client'
+
 import Head from "next/head";
 import { ChangeEvent, useId, useState } from "react";
 
@@ -19,13 +21,14 @@ export default function Home() {
   const answerId = useId();
   const queryId = useId();
   const sourceId = useId();
-  const [text, setText] = useState(essay);
+  const [text, setText] = useState("");
   const [query, setQuery] = useState("");
   const [needsNewIndex, setNeedsNewIndex] = useState(true);
   const [buildingIndex, setBuildingIndex] = useState(false);
   const [runningQuery, setRunningQuery] = useState(false);
   const [nodesWithEmbedding, setNodesWithEmbedding] = useState([]);
   const [chunkSize, setChunkSize] = useState(DEFAULT_CHUNK_SIZE.toString());
+  const [showSettings, setShowSettings] = useState(false);
   //^ We're making all of these strings to preserve things like the user typing "0."
   const [chunkOverlap, setChunkOverlap] = useState(
     DEFAULT_CHUNK_OVERLAP.toString(),
@@ -37,6 +40,10 @@ export default function Home() {
   const [topP, setTopP] = useState(DEFAULT_TOP_P.toString());
   const [answer, setAnswer] = useState("");
 
+  const handleStoryGenerated = (story: string) => {
+    setText(story);
+  };
+
   return (
     <>
       <Head>
@@ -45,8 +52,13 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="mx-2 flex h-full flex-col lg:mx-56">
-        <Chat />
+      <Chat onStoryGenerated={handleStoryGenerated} />
         <div className="space-y-2">
+          <button onClick={() => setShowSettings(!showSettings)}>
+            {showSettings ? 'Hide Settings' : 'Show Settings'}
+          </button>
+          {showSettings && (
+          <>
           <Label>Settings:</Label>
           <div>
             <LinkedSlider
@@ -84,13 +96,16 @@ export default function Home() {
               }}
             />
           </div>
+          </>
+          )}
         </div>
+
         <div className="my-2 flex h-3/4 flex-auto flex-col space-y-2">
-          <Label htmlFor={sourceId}>Source text:</Label>
+          <Label htmlFor={sourceId}>Generated Story:</Label>
           <Textarea
             id={sourceId}
             value={text}
-            className="flex-1"
+            className="flex-2 h-96 w-full"
             onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
               setText(e.target.value);
               setNeedsNewIndex(true);
@@ -185,7 +200,7 @@ export default function Home() {
             />
 
             <div className="my-2 space-y-2">
-              <Label htmlFor={queryId}>Query:</Label>
+              <Label htmlFor={queryId}>Ask a question about the story:</Label>
               <div className="flex w-full space-x-2">
                 <Input
                   id={queryId}

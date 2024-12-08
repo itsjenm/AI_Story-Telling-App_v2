@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useChat } from "ai/react";
 
-export default function Chat() {
-  const { messages, append, isLoading } = useChat();
+export default function Chat({ onStoryGenerated }) {
+  const { messages, append, isLoading } = useChat({
+    api: '/api/chat',
+  });
+
+  const [story, setStory] = useState("");
 
   const genres = [
     { emoji: "🧙", value: "Fantasy" },
@@ -38,11 +42,19 @@ export default function Chat() {
   const handleChange = ({
     target: { name, value },
   }: React.ChangeEvent<HTMLInputElement>) => {
-    setState({
-      ...state,
-      [name]: value,
-    });
+    setState((prevState) => ({
+      ...prevState,
+      [name]: value
+    }));
   };
+
+  useEffect(() => {
+    if (messages.length > 0 && !messages[messages.length - 1]?.content.startsWith("Generate")) {
+      const generatedStory = messages[messages.length - 1]?.content;
+      setStory(generatedStory);
+      onStoryGenerated(generatedStory);
+    }
+  }, [messages, onStoryGenerated]);
 
   const handleCharacterChange = ({
     target: { name, value },
@@ -75,6 +87,29 @@ export default function Chat() {
     const updatedCharacters = characters.filter((_, i) => i !== index);
     setCharacters(updatedCharacters);
   };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result;
+      if (text) {
+        const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line);
+        let name, description, personality;
+  
+        if (lines.length === 1) {
+          // Assuming the format is "name,description,personality"
+          [name, description, personality] = lines[0].split(',').map(item => item.trim());
+        } else if (lines.length >= 3) {
+          [name, description, personality] = lines;
+        }
+  
+        setNewCharacter({ name, description, personality });
+      }
+    };
+    reader.readAsText(file);
+  };
+
 
 
   return (
@@ -122,6 +157,12 @@ export default function Chat() {
               onClick={addCharacter}>
               {editingIndex !== null ? "Update Character" : "Add Character"}
             </button>
+            <input
+              type="file"
+              accept=".txt"
+              onChange={handleFileChange}
+              className="p-2 bg-gray-800 text-white rounded"
+            />
           </div>
 
           <div className="space-y-4 bg-opacity-25 bg-gray-700 rounded-lg p-4">
@@ -241,8 +282,8 @@ export default function Chat() {
             messages.length === 0 ||
             messages[messages.length - 1]?.content.startsWith("Generate")
           }
-          className="bg-opacity-25 bg-gray-700 rounded-lg p-4">
-          {messages[messages.length - 1]?.content}
+          >
+          {/* {messages[messages.length - 1]?.content} */}
         </div>
       </div>
     </main>
