@@ -6,6 +6,9 @@ Run `pnpm install` and `pnpm run dev`
 
 Make sure to set your OpenAI key: `export OPENAI_API_KEY-="sk-..."`
 
+## Configuration
+
+To use OpenAI and make requests, you need to change the `baseURL` in your configuration file. Update the `baseURL` to point to the OpenAI API endpoint.
 
 ## Credits
 
